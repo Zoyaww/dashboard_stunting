@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
         }
 
@@ -400,6 +402,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="navbar">
         <div class="navbar-content">
@@ -501,7 +504,8 @@
                 <li>API access untuk integrasi third-party</li>
             </ul>
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="this.textContent = 'Fitur sedang dikembangkan...'">Buka Editor</button>
+                <button class="btn btn-primary" onclick="this.textContent = 'Fitur sedang dikembangkan...'">Buka
+                    Editor</button>
                 <button class="btn" onclick="this.textContent = 'Fitur sedang dikembangkan...'">Dokumentasi</button>
             </div>
         </div>
@@ -509,10 +513,14 @@
         <div class="card">
             <div class="card-title">Informasi Sistem</div>
             <p>
-                WebGIS adalah sistem manajemen informasi geografis terpadu yang dirancang untuk memenuhi kebutuhan pemetaan dan analisis data spasial. Platform ini menyediakan tools canggih untuk visualisasi data geografis, analisis spasial, dan kolaborasi tim dalam satu ekosistem yang terintegrasi.
+                WebGIS adalah sistem manajemen informasi geografis terpadu yang dirancang untuk memenuhi kebutuhan
+                pemetaan dan analisis data spasial. Platform ini menyediakan tools canggih untuk visualisasi data
+                geografis, analisis spasial, dan kolaborasi tim dalam satu ekosistem yang terintegrasi.
             </p>
             <p style="margin-top: 1rem;">
-                Dengan dukungan untuk berbagai format data GIS standard dan API yang fleksibel, WebGIS memungkinkan integrasi seamless dengan sistem existing Anda. Fitur real-time synchronization memastikan semua data selalu up-to-date di semua platform.
+                Dengan dukungan untuk berbagai format data GIS standard dan API yang fleksibel, WebGIS memungkinkan
+                integrasi seamless dengan sistem existing Anda. Fitur real-time synchronization memastikan semua data
+                selalu up-to-date di semua platform.
             </p>
         </div>
     </div>
@@ -530,20 +538,10 @@
         const themeIcon = document.getElementById('themeIcon');
         const htmlElement = document.documentElement;
 
-        // Inisialisasi tema
         function initTheme() {
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
-            if (savedTheme) {
-                if (savedTheme === 'dark') {
-                    htmlElement.classList.add('dark-mode');
-                    themeIcon.textContent = '☀️';
-                } else {
-                    htmlElement.classList.remove('dark-mode');
-                    themeIcon.textContent = '🌙';
-                }
-            } else if (prefersDark) {
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
                 htmlElement.classList.add('dark-mode');
                 themeIcon.textContent = '☀️';
             } else {
@@ -552,7 +550,6 @@
             }
         }
 
-        // Toggle tema
         themeToggle.addEventListener('click', () => {
             htmlElement.classList.toggle('dark-mode');
             const isDarkMode = htmlElement.classList.contains('dark-mode');
@@ -560,35 +557,7 @@
             themeIcon.textContent = isDarkMode ? '☀️' : '🌙';
         });
 
-        // Inisialisasi peta
-        function initMap() {
-            // Jakarta sebagai default koordinat
-            const centerLat = -6.2088;
-            const centerLng = 106.8456;
-
-            map = L.map('map').setView([centerLat, centerLng], 13);
-
-            // Tambahkan OpenStreetMap tiles
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19,
-            }).addTo(map);
-
-            // Tambahkan beberapa marker contoh
-            const locations = [
-                { lat: -6.2088, lng: 106.8456, name: 'Jakarta Pusat' },
-                { lat: -6.3111, lng: 106.7064, name: 'Jakarta Selatan' },
-                { lat: -6.1516, lng: 106.6561, name: 'Jakarta Timur' },
-            ];
-
-            locations.forEach(loc => {
-                L.marker([loc.lat, loc.lng])
-                    .bindPopup(`<strong>${loc.name}</strong>`)
-                    .addTo(map);
-            });
-        }
-
-        // Zoom ke lokasi pengguna
+        // ✅ Dipindah ke scope global agar onclick bisa akses
         function zoomToLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -601,30 +570,91 @@
                             .addTo(map)
                             .openPopup();
                     },
-                    () => {
-                        alert('Tidak dapat mengakses lokasi Anda');
-                    }
+                    () => alert('Tidak dapat mengakses lokasi Anda')
                 );
             }
         }
 
-        // Tambah marker
         function addMarker() {
             markerCount++;
-            const randomLat = -6.2088 + (Math.random() - 0.5) * 0.3;
-            const randomLng = 106.8456 + (Math.random() - 0.5) * 0.3;
-            
+            const randomLat = -3.7965 + (Math.random() - 0.5) * 0.3;
+            const randomLng = 114.7820 + (Math.random() - 0.5) * 0.3;
             L.marker([randomLat, randomLng])
-                .bindPopup(`<strong>Marker ${markerCount}</strong><br>Lat: ${randomLat.toFixed(4)}<br>Lng: ${randomLng.toFixed(4)}`)
+                .bindPopup(
+                    `<strong>Marker ${markerCount}</strong><br>Lat: ${randomLat.toFixed(4)}<br>Lng: ${randomLng.toFixed(4)}`
+                )
                 .addTo(map)
                 .openPopup();
         }
 
-        // Inisialisasi saat halaman dimuat
+        function initMap() {
+            map = L.map('map').setView([-3.8565, 114.9850], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19,
+            }).addTo(map);
+
+            fetch('/geojson/tanah_laut.geojson')
+                .then(response => response.json())
+                .then(data => {
+                    L.geoJSON(data, {
+                        style: {
+                            color: "#008000",
+                            weight: 2,
+                            fillColor: "#90EE90",
+                            fillOpacity: 0.3
+                        }
+                    }).addTo(map);
+                });
+
+            fetch('/api/stuntings')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(item => {
+                        let iconUrl;
+                        if (item.status === 'Stunting') {
+                            iconUrl =
+                                'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
+                        } else if (item.status === 'Stunting Sedang') {
+                            iconUrl =
+                                'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png';
+                        } else {
+                            iconUrl =
+                                'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png';
+                        }
+
+                        const icon = L.icon({
+                            iconUrl: iconUrl,
+                            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                        });
+
+                        L.marker([parseFloat(item.latitude), parseFloat(item.longitude)], {
+                                icon
+                            })
+                            .bindPopup(`
+                    <b>${item.nama}</b><br>
+                    Desa: ${item.desa}<br>
+                    Kecamatan: ${item.kecamatan}<br>
+                    Status: <b style="color:${
+                        item.status === 'Stunting' ? 'red' : 
+                        item.status === 'Stunting Sedang' ? 'orange' : 'green'
+                    }">${item.status}</b>
+                `)clea
+                            .addTo(map);
+                    });
+                });
+
+        }
+
+        // ✅ DOMContentLoaded di scope global, memanggil initMap()
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
             initMap();
         });
     </script>
 </body>
+
 </html>
