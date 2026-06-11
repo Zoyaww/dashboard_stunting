@@ -635,21 +635,48 @@
                                 icon
                             })
                             .bindPopup(`
-                    <b>${item.nama}</b><br>
-                    Desa: ${item.desa}<br>
-                    Kecamatan: ${item.kecamatan}<br>
-                    Status: <b style="color:${
-                        item.status === 'Stunting' ? 'red' : 
-                        item.status === 'Stunting Sedang' ? 'orange' : 'green'
-                    }">${item.status}</b>
-                `)
+                    <div style="min-width:300px;font-family:sans-serif;font-size:13px">
+                        <b style="font-size:15px">📍 ${item.nama}</b><br>
+                        <span style="color:#666">Kecamatan: ${item.kecamatan}</span>
+                        <hr style="margin:6px 0">
+                        <table style="width:100%;border-collapse:collapse">
+                            <tr style="background:#f0f0f0;font-weight:bold;text-align:center">
+                                <td style="padding:4px 6px;border:1px solid #ddd">Tahun</td>
+                                <td style="padding:4px 6px;border:1px solid #ddd">Balita</td>
+                                <td style="padding:4px 6px;border:1px solid #ddd">Stunting</td>
+                                <td style="padding:4px 6px;border:1px solid #ddd">Prevalensi</td>
+                            </tr>
+                            ${[2020,2021,2022,2023,2024,2025].map(y => {
+                                const b = item['balita_'+y];
+                                const s = item['stunting_'+y];
+                                const p = item['prevalensi_'+y];
+                                const color = p > 10 ? 'red' : p >= 5 ? 'orange' : 'green';
+                                const icon2 = p > 10 ? '🔴' : p >= 5 ? '🟡' : p ? '🟢' : '';
+                                return '<tr style="text-align:center;border-top:1px solid #eee">'
+                                    + '<td style="padding:4px 6px;border:1px solid #ddd"><b>'+y+'</b></td>'
+                                    + '<td style="padding:4px 6px;border:1px solid #ddd">'+(b ? b.toLocaleString() : '-')+'</td>'
+                                    + '<td style="padding:4px 6px;border:1px solid #ddd">'+(s ?? '-')+'</td>'
+                                    + '<td style="padding:4px 6px;border:1px solid #ddd;color:'+(p ? color : '#aaa')+';font-weight:bold">'
+                                    + (p ? icon2+' '+p+'%' : '-')+'</td>'
+                                    + '</tr>';
+                            }).join('')}
+                        </table>
+                        <hr style="margin:6px 0">
+                        <div style="text-align:center">
+                            Status 2025: <b style="color:${
+                                item.status === 'Stunting' ? 'red' :
+                                item.status === 'Stunting Sedang' ? 'orange' : 'green'
+                            }">${item.status}</b>
+                        </div>
+                    </div>
+                `, {
+                                maxWidth: 350
+                            })
                             .addTo(map);
                     });
                 });
-
         }
 
-        // ✅ DOMContentLoaded di scope global, memanggil initMap()
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
             initMap();
