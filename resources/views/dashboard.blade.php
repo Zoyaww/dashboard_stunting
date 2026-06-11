@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebGIS - Dashboard Kabupaten Tanah Laut</title>
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <style>
         * {
@@ -240,12 +239,54 @@
             border-radius: 2px;
         }
 
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            padding: 12px 14px;
+            background: var(--accent-light);
+            border-radius: 6px;
+        }
+
+        .filter-bar label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .filter-bar select {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .filter-legend {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
         #map {
             width: 100%;
             height: 500px;
             border-radius: 6px;
             margin-bottom: 1.5rem;
             border: 1px solid var(--border-color);
+        }
+
+        .map-info {
+            background: var(--accent-light);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
         }
 
         .feature-list {
@@ -292,10 +333,6 @@
             font-size: 0.85rem;
             display: block;
             opacity: 0.8;
-        }
-
-        .section-divider {
-            margin: 2rem 0;
         }
 
         .action-buttons {
@@ -347,15 +384,6 @@
             margin-top: 3rem;
         }
 
-        .map-info {
-            background: var(--accent-light);
-            padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
         .leaflet-container {
             background: var(--bg-primary) !important;
         }
@@ -399,6 +427,11 @@
             #map {
                 height: 400px;
             }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -429,40 +462,58 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">Total Lokasi Terpetakan</div>
-                <div class="stat-value">1,250</div>
-                <div class="stat-change positive">↑ 12% dari bulan lalu</div>
+                <div class="stat-label">Total Puskesmas Terpetakan</div>
+                <div class="stat-value">22</div>
+                <div class="stat-change positive">↑ Kabupaten Tanah Laut</div>
             </div>
-
             <div class="stat-card">
-                <div class="stat-label">Lapisan Peta Aktif</div>
-                <div class="stat-value">8</div>
-                <div class="stat-change">3 lapisan dalam pengembangan</div>
+                <div class="stat-label">Prevalensi Stunting 2025</div>
+                <div class="stat-value">6.62%</div>
+                <div class="stat-change negative">↑ dari 5.55% tahun 2024</div>
             </div>
-
             <div class="stat-card">
-                <div class="stat-label">Pengguna Terdaftar</div>
-                <div class="stat-value">156</div>
-                <div class="stat-change positive">↑ 8 pengguna baru minggu ini</div>
+                <div class="stat-label">Puskesmas Zona Merah</div>
+                <div class="stat-value">6</div>
+                <div class="stat-change negative">Prevalensi &gt; 10%</div>
             </div>
-
             <div class="stat-card">
-                <div class="stat-label">Data Terproses</div>
-                <div class="stat-value">42.5K</div>
-                <div class="stat-change">Pembaruan real-time</div>
+                <div class="stat-label">Total Balita Ditimbang 2025</div>
+                <div class="stat-value">25.773</div>
+                <div class="stat-change">Data per Maret 2025</div>
             </div>
         </div>
 
         <div class="content-grid">
             <div class="card">
-                <div class="card-title">Peta Interaktif</div>
+                <div class="card-title">Peta Stunting Interaktif</div>
                 <div class="map-info">
-                    📍 Menggunakan OpenStreetMap - gratis, open source, tanpa API key
+                    📍 Kabupaten Tanah Laut — Data Puskesmas 2020–2025
                 </div>
+
+                <!-- Filter Tahun -->
+                <div class="filter-bar">
+                    <label>🗓️ Filter Tahun:</label>
+                    <select id="filterTahun">
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                    </select>
+                    <span class="filter-legend">
+                        🔴 Stunting (&gt;10%) &nbsp;
+                        🟡 Sedang (5–10%) &nbsp;
+                        🟢 Normal (&lt;5%) &nbsp;
+                        ⚪ Data tidak tersedia
+                    </span>
+                </div>
+
                 <div id="map"></div>
+
                 <div class="action-buttons">
                     <button class="btn btn-primary" onclick="zoomToLocation()">📍 Lokasi Saya</button>
-                    <button class="btn" onclick="addMarker()">📌 Tambah Marker</button>
+                    <button class="btn" onclick="resetView()">🔄 Reset Peta</button>
                 </div>
             </div>
 
@@ -499,7 +550,7 @@
                 <li>Visualisasi peta interaktif dengan multiple layers</li>
                 <li>Analisis data spasial dan statistik geografis</li>
                 <li>Import dan export dalam format standar GIS</li>
-                <li>Search lokasi dan routing dengan presisi tinggi</li>
+                <li>Filter data stunting per tahun (2020–2025)</li>
                 <li>Generate laporan dan dokumentasi komprehensif</li>
                 <li>API access untuk integrasi third-party</li>
             </ul>
@@ -514,30 +565,33 @@
             <div class="card-title">Informasi Sistem</div>
             <p>
                 WebGIS adalah sistem manajemen informasi geografis terpadu yang dirancang untuk memenuhi kebutuhan
-                pemetaan dan analisis data spasial. Platform ini menyediakan tools canggih untuk visualisasi data
-                geografis, analisis spasial, dan kolaborasi tim dalam satu ekosistem yang terintegrasi.
+                pemetaan dan analisis data spasial stunting di Kabupaten Tanah Laut. Platform ini menyediakan tools
+                canggih untuk visualisasi data geografis, analisis spasial per tahun, dan monitoring tren stunting
+                dari 2020 hingga 2025.
             </p>
             <p style="margin-top: 1rem;">
-                Dengan dukungan untuk berbagai format data GIS standard dan API yang fleksibel, WebGIS memungkinkan
-                integrasi seamless dengan sistem existing Anda. Fitur real-time synchronization memastikan semua data
-                selalu up-to-date di semua platform.
+                Data bersumber dari laporan Puskesmas melalui aplikasi e-PPGBM. Marker pada peta menunjukkan lokasi
+                22 Puskesmas di Kabupaten Tanah Laut dengan warna yang mencerminkan tingkat prevalensi stunting
+                sesuai tahun yang dipilih.
             </p>
         </div>
     </div>
 
     <div class="footer">
-        <p>WebGIS © 2026. All rights reserved.</p>
+        <p>WebGIS Stunting Kabupaten Tanah Laut © 2026. All rights reserved.</p>
     </div>
 
-    <!-- Leaflet JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script>
         let map;
-        let markerCount = 0;
+        let markers = [];
+        let stuntingData = [];
+
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const htmlElement = document.documentElement;
 
+        // ── Theme ──────────────────────────────────────────────
         function initTheme() {
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -552,20 +606,102 @@
 
         themeToggle.addEventListener('click', () => {
             htmlElement.classList.toggle('dark-mode');
-            const isDarkMode = htmlElement.classList.contains('dark-mode');
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            themeIcon.textContent = isDarkMode ? '☀️' : '🌙';
+            const isDark = htmlElement.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeIcon.textContent = isDark ? '☀️' : '🌙';
         });
 
-        // ✅ Dipindah ke scope global agar onclick bisa akses
+        // ── Helpers ────────────────────────────────────────────
+        function getIconUrl(prevalensi) {
+            if (prevalensi === null || prevalensi === undefined || prevalensi === '') {
+                return 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png';
+            } else if (prevalensi > 10) {
+                return 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
+            } else if (prevalensi >= 5) {
+                return 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png';
+            } else {
+                return 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png';
+            }
+        }
+
+        function buildPopup(item) {
+            let rows = '';
+            [2020, 2021, 2022, 2023, 2024, 2025].forEach(y => {
+                const b = item['balita_' + y];
+                const s = item['stunting_' + y];
+                const p = item['prevalensi_' + y];
+                const color = p > 10 ? 'red' : p >= 5 ? 'orange' : 'green';
+                const icon2 = p > 10 ? '🔴' : p >= 5 ? '🟡' : p ? '🟢' : '⚪';
+                rows += '<tr style="text-align:center;border-top:1px solid #eee">' +
+                    '<td style="padding:4px 8px;border:1px solid #ddd"><b>' + y + '</b></td>' +
+                    '<td style="padding:4px 8px;border:1px solid #ddd">' + (b ? b.toLocaleString('id-ID') : '-') +
+                    '</td>' +
+                    '<td style="padding:4px 8px;border:1px solid #ddd">' + (s !== null && s !== undefined ? s :
+                    '-') + '</td>' +
+                    '<td style="padding:4px 8px;border:1px solid #ddd;color:' + (p ? color : '#aaa') +
+                    ';font-weight:bold">' +
+                    (p ? icon2 + ' ' + p + '%' : '⚪ -') + '</td>' +
+                    '</tr>';
+            });
+
+            return '<div style="min-width:310px;font-family:sans-serif;font-size:13px">' +
+                '<b style="font-size:15px">📍 ' + item.nama + '</b><br>' +
+                '<span style="color:#888;font-size:12px">Kecamatan: ' + item.kecamatan + '</span>' +
+                '<hr style="margin:6px 0;border-color:#eee">' +
+                '<table style="width:100%;border-collapse:collapse">' +
+                '<tr style="background:#f5f5f5;font-weight:bold;text-align:center">' +
+                '<td style="padding:4px 8px;border:1px solid #ddd">Tahun</td>' +
+                '<td style="padding:4px 8px;border:1px solid #ddd">Balita</td>' +
+                '<td style="padding:4px 8px;border:1px solid #ddd">Stunting</td>' +
+                '<td style="padding:4px 8px;border:1px solid #ddd">Prevalensi</td>' +
+                '</tr>' +
+                rows +
+                '</table>' +
+                '<hr style="margin:6px 0;border-color:#eee">' +
+                '<div style="text-align:center;font-size:13px">' +
+                'Status 2025: <b style="color:' +
+                (item.status === 'Stunting' ? 'red' : item.status === 'Stunting Sedang' ? 'orange' : 'green') +
+                '">' + item.status + '</b>' +
+                '</div></div>';
+        }
+
+        function renderMarkers(tahun) {
+            // Hapus marker lama
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            stuntingData.forEach(item => {
+                const p = item['prevalensi_' + tahun];
+
+                const leafletIcon = L.icon({
+                    iconUrl: getIconUrl(p),
+                    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                });
+
+                const marker = L.marker(
+                        [parseFloat(item.latitude), parseFloat(item.longitude)], {
+                            icon: leafletIcon
+                        }
+                    )
+                    .bindPopup(buildPopup(item), {
+                        maxWidth: 360
+                    })
+                    .addTo(map);
+
+                markers.push(marker);
+            });
+        }
+
+        // ── Map controls ───────────────────────────────────────
         function zoomToLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    position => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        map.setView([lat, lng], 15);
-                        L.marker([lat, lng])
+                    pos => {
+                        map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+                        L.marker([pos.coords.latitude, pos.coords.longitude])
                             .bindPopup('Lokasi Anda Saat Ini')
                             .addTo(map)
                             .openPopup();
@@ -575,27 +711,22 @@
             }
         }
 
-        function addMarker() {
-            markerCount++;
-            const randomLat = -3.7965 + (Math.random() - 0.5) * 0.3;
-            const randomLng = 114.7820 + (Math.random() - 0.5) * 0.3;
-            L.marker([randomLat, randomLng])
-                .bindPopup(
-                    `<strong>Marker ${markerCount}</strong><br>Lat: ${randomLat.toFixed(4)}<br>Lng: ${randomLng.toFixed(4)}`
-                )
-                .addTo(map)
-                .openPopup();
+        function resetView() {
+            map.setView([-3.8565, 114.9850], 10);
         }
 
+        // ── Init Map ───────────────────────────────────────────
         function initMap() {
             map = L.map('map').setView([-3.8565, 114.9850], 10);
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 19,
             }).addTo(map);
 
+            // GeoJSON batas wilayah
             fetch('/geojson/tanah_laut.geojson')
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     L.geoJSON(data, {
                         style: {
@@ -607,76 +738,20 @@
                     }).addTo(map);
                 });
 
+            // Data stunting
             fetch('/api/stuntings')
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
-                    data.forEach(item => {
-                        let iconUrl;
-                        if (item.status === 'Stunting') {
-                            iconUrl =
-                                'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
-                        } else if (item.status === 'Stunting Sedang') {
-                            iconUrl =
-                                'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png';
-                        } else {
-                            iconUrl =
-                                'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png';
-                        }
+                    stuntingData = data;
+                    renderMarkers(2025); // default 2025
 
-                        const icon = L.icon({
-                            iconUrl: iconUrl,
-                            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                        });
-
-                        L.marker([parseFloat(item.latitude), parseFloat(item.longitude)], {
-                                icon
-                            })
-                            .bindPopup(`
-                    <div style="min-width:300px;font-family:sans-serif;font-size:13px">
-                        <b style="font-size:15px">📍 ${item.nama}</b><br>
-                        <span style="color:#666">Kecamatan: ${item.kecamatan}</span>
-                        <hr style="margin:6px 0">
-                        <table style="width:100%;border-collapse:collapse">
-                            <tr style="background:#f0f0f0;font-weight:bold;text-align:center">
-                                <td style="padding:4px 6px;border:1px solid #ddd">Tahun</td>
-                                <td style="padding:4px 6px;border:1px solid #ddd">Balita</td>
-                                <td style="padding:4px 6px;border:1px solid #ddd">Stunting</td>
-                                <td style="padding:4px 6px;border:1px solid #ddd">Prevalensi</td>
-                            </tr>
-                            ${[2020,2021,2022,2023,2024,2025].map(y => {
-                                const b = item['balita_'+y];
-                                const s = item['stunting_'+y];
-                                const p = item['prevalensi_'+y];
-                                const color = p > 10 ? 'red' : p >= 5 ? 'orange' : 'green';
-                                const icon2 = p > 10 ? '🔴' : p >= 5 ? '🟡' : p ? '🟢' : '';
-                                return '<tr style="text-align:center;border-top:1px solid #eee">'
-                                    + '<td style="padding:4px 6px;border:1px solid #ddd"><b>'+y+'</b></td>'
-                                    + '<td style="padding:4px 6px;border:1px solid #ddd">'+(b ? b.toLocaleString() : '-')+'</td>'
-                                    + '<td style="padding:4px 6px;border:1px solid #ddd">'+(s ?? '-')+'</td>'
-                                    + '<td style="padding:4px 6px;border:1px solid #ddd;color:'+(p ? color : '#aaa')+';font-weight:bold">'
-                                    + (p ? icon2+' '+p+'%' : '-')+'</td>'
-                                    + '</tr>';
-                            }).join('')}
-                        </table>
-                        <hr style="margin:6px 0">
-                        <div style="text-align:center">
-                            Status 2025: <b style="color:${
-                                item.status === 'Stunting' ? 'red' :
-                                item.status === 'Stunting Sedang' ? 'orange' : 'green'
-                            }">${item.status}</b>
-                        </div>
-                    </div>
-                `, {
-                                maxWidth: 350
-                            })
-                            .addTo(map);
+                    document.getElementById('filterTahun').addEventListener('change', function() {
+                        renderMarkers(this.value);
                     });
                 });
         }
 
+        // ── Boot ───────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
             initMap();
