@@ -642,7 +642,7 @@
                         item.status === 'Stunting' ? 'red' : 
                         item.status === 'Stunting Sedang' ? 'orange' : 'green'
                     }">${item.status}</b>
-                `)clea
+                `)
                             .addTo(map);
                     });
                 });
