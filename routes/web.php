@@ -24,3 +24,23 @@ Route::put('/admin/locations/{location}', [AdminController::class, 'update']);
 Route::delete('/admin/locations/{location}', [AdminController::class, 'destroy']);
 
 Route::get('/api/stuntings', [StuntingController::class, 'api']);
+
+
+
+Route::get('/', function () {
+    return redirect()->route('admin.dashboard');
+});
+
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        Route::resource('rekap-kecamatan', RekapKecamatanController::class);
+        Route::resource('rekap-puskesmas', RekapPuskesmasController::class);
+
+        Route::get('/import-stunting', [ImportStuntingController::class, 'index'])->name('import.index');
+        Route::post('/import-stunting', [ImportStuntingController::class, 'store'])->name('import.store');
+    });
